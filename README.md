@@ -50,7 +50,7 @@ the id of a file. File ids are saved in a separate document.
 *Test results*: processed required volume of documents in ~8-12 seconds (Intel core i7, 8 cores)
 
 
-##2. Bool search
+## 2. Bool search
 
 **_Task_**:
 
