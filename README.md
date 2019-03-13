@@ -7,7 +7,7 @@ methods of search in large amount of data.
 
 ## 1. Language dictionary
 
-*Task*: 
+**_Task_**: 
 
 Write a program that builds a dictionary of terms according to a 
 given collection of text files.
@@ -21,7 +21,7 @@ given collection of text files.
 - Make an estimation of the complexity of the algorithm
 - Try several formats for saving the dictionary (serialization of the dictionary, saving to a text file, etc.) and compare the results.
 
-*Solution*:
+**_Solution_**:
 
 I have used a paradigm of parallel programming 'producers and consumers', 
 as well as 'map and reduce' method in order to speed the performance of the task.
@@ -52,7 +52,7 @@ the id of a file. File ids are saved in a separate document.
 
 ##2. Bool search
 
-*Task*:
+**_Task_**:
 
 According to the given collection (10 documents for 150K) of documents to build:
 
@@ -67,6 +67,6 @@ Make a Boolean search for these structures (both).
 
 Operators: AND, OR, NOT. Format on request at your own discretion
 
-*Solution*:
+**_Solution_**:
 
 In progress
