@@ -59,12 +59,14 @@ def dict_to_str(dictionary: OrderedDict) -> str:
     return '\t'.join([f'{key}|{value}' for key, value in dictionary.items()])
 
 
-def write_lexicon_to_file(lexicon: SortedDict, path: str):
-    print(f'Writing dict of size {len(lexicon)} to {path}')
+def write_dictionary_to_file(dictionary: SortedDict, path: str,
+                             is_lexicon=False):
+    print(f'Writing dict of size {len(dictionary)} to {path}')
 
     with open(path, 'w') as result_file:
-        for key in lexicon:
-            documents = iterable_to_str(lexicon[key])
+        for key, values in dictionary.items():
+            documents = iterable_to_str(values)
+            key = f'{key}{"|" + str(len(values)) if is_lexicon else "" }'
             result_file.write(f'{key}\t{documents}\n')
 
 

@@ -9,7 +9,7 @@ from sortedcontainers import SortedDict
 from dictionary.decoder import get_file_reader_by_extension
 from dictionary.exceptions import NotSupportedExtensionException
 from dictionary.utils import get_list_of_files, write_doc_ids_to_file, \
-    write_lexicon_to_file, write_token_list_to_file, \
+    write_dictionary_to_file, write_token_list_to_file, \
     add_unfinished_part_from_prev_chunk, get_tokens_from_chunk, PATH_TO_DIR
 
 CHUNK_SIZE = 1024
@@ -202,8 +202,8 @@ def main():
     print('dictionary created')
 
     write_lexicon_process = \
-        Process(target=write_lexicon_to_file,
-                args=(inverted_index, PATH_TO_DICT))
+        Process(target=write_dictionary_to_file,
+                args=(inverted_index, PATH_TO_DICT, True))
     write_lexicon_process.start()
 
     for file_id, word_position_list in lexicon.items():
