@@ -4,6 +4,8 @@ from _queue import Empty
 from multiprocessing import Queue, Event, Process, Pool
 from threading import Thread
 
+from sortedcontainers import SortedDict
+
 from dictionary.decoder import get_file_reader_by_extension
 from dictionary.exceptions import NotSupportedExtensionException
 from dictionary.utils import get_list_of_files, write_doc_ids_to_file, \
@@ -28,8 +30,8 @@ token_queue = Queue()
 file_job_done = Event()
 token_job_done = Queue(maxsize=CHUNK_WORKERS_NUM)
 
-token_dict = dict()
-word_position_lists = dict()
+inverted_index = SortedDict()
+lexicon = dict()
 
 
 def retrieve_tokens(chunk_start, chunk) -> list:
@@ -78,10 +80,9 @@ def chunk_to_tokens_worker():
 
 
 def get_list_or_add_to_lists(file_id: int) -> dict:
-    if file_id not in word_position_lists:
-        word_position_lists[file_id] = dict()
-
-    return word_position_lists[file_id]
+    if file_id not in lexicon:
+        lexicon[file_id] = SortedDict()
+    return lexicon[file_id]
 
 
 def reduce_tokens_to_lexicon():
@@ -93,9 +94,9 @@ def reduce_tokens_to_lexicon():
     """
 
     def append_token_to_dict():
-        if token not in token_dict:
-            token_dict[token] = set()
-        token_dict[token].add(file_id)
+        if token not in inverted_index:
+            inverted_index[token] = set()
+        inverted_index[token].add(file_id)
 
     def append_token_to_list():
         if token not in curr_word_position_list:
@@ -201,12 +202,13 @@ def main():
     print('dictionary created')
 
     write_lexicon_process = \
-        Process(target=write_lexicon_to_file, args=(token_dict, PATH_TO_DICT))
+        Process(target=write_lexicon_to_file,
+                args=(inverted_index, PATH_TO_DICT))
     write_lexicon_process.start()
 
-    for file_id, word_position_list in word_position_lists.items():
+    for file_id, word_position_list in lexicon.items():
         path_to_result_file = \
-            os.path.join(PATH_TO_RESULT_DIR, f'dict_{file_id}')
+            os.path.join(PATH_TO_RESULT_DIR, str(file_id))
         write_token_list_to_file(word_position_list, path_to_result_file)
 
 
