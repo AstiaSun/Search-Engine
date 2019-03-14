@@ -3,6 +3,8 @@ from collections import OrderedDict
 from string import whitespace
 from typing import Tuple
 
+from sortedcontainers import SortedDict
+
 from dictionary.tokenizer import Tokenizer
 
 PATH_TO_DIR = os.path.join(os.curdir, 'files')
@@ -57,7 +59,7 @@ def dict_to_str(dictionary: OrderedDict) -> str:
     return '\t'.join([f'{key}|{value}' for key, value in dictionary.items()])
 
 
-def write_lexicon_to_file(lexicon: OrderedDict, path: str):
+def write_lexicon_to_file(lexicon: SortedDict, path: str):
     print(f'Writing dict of size {len(lexicon)} to {path}')
 
     with open(path, 'w') as result_file:

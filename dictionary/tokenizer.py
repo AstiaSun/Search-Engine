@@ -186,7 +186,8 @@ class Tokenizer:
     @staticmethod
     def _remove_special_characters(text: str, remove_digits=False) -> str:
         """removes all special characters from the text"""
-        pattern = r'[^a-zA-z0-9\s]' if not remove_digits else r'[^a-zA-z\s]'
+        pattern = r'[\.,!?;:\[\\\]\(\)~\{\}}\s\-{2,}"/\*\^±§`<>' + \
+                  '/d]' if remove_digits else ']'
         text = re.sub(pattern, '', text)
         return text
 
