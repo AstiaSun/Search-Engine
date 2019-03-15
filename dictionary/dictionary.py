@@ -6,6 +6,8 @@ from threading import Thread
 
 from sortedcontainers import SortedDict
 
+from common.constants import PATH_TO_DICT, PATH_TO_RESULT_DIR, \
+    PATH_TO_LIST_OF_FILES
 from dictionary.decoder import get_file_reader_by_extension
 from dictionary.exceptions import NotSupportedExtensionException
 from dictionary.utils import get_list_of_files, write_doc_ids_to_file, \
@@ -13,10 +15,6 @@ from dictionary.utils import get_list_of_files, write_doc_ids_to_file, \
     add_unfinished_part_from_prev_chunk, get_tokens_from_chunk, PATH_TO_DIR
 
 CHUNK_SIZE = 1024
-
-PATH_TO_RESULT_DIR = os.path.join(os.curdir, 'data')
-PATH_TO_LIST_OF_FILES = os.path.join(os.curdir, 'data', 'files')
-PATH_TO_DICT = os.path.join(PATH_TO_RESULT_DIR, 'dict')
 
 QUEUE_MAX_SIZE = 10000
 QUEUE_MIN_SIZE = 10000

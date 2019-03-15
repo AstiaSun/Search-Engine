@@ -5,6 +5,7 @@ from typing import Tuple
 
 from sortedcontainers import SortedDict
 
+from common.constants import DIVIDER, SPLIT
 from dictionary.tokenizer import Tokenizer
 
 PATH_TO_DIR = os.path.join(os.curdir, 'files')
@@ -12,8 +13,6 @@ PATH_TO_DIR = os.path.join(os.curdir, 'files')
 REGEXPS = {
     'ip_addres': r'([\\d]{1, 3}.){3}[\\d]{1, 3}}'
 }
-
-PUNCTUATION = '.,!?;:'
 
 tokenizer = Tokenizer()
 
@@ -66,8 +65,8 @@ def write_dictionary_to_file(dictionary: SortedDict, path: str,
     with open(path, 'w') as result_file:
         for key, values in dictionary.items():
             documents = iterable_to_str(values)
-            key = f'{key}{"|" + str(len(values)) if is_lexicon else "" }'
-            result_file.write(f'{key}\t{documents}\n')
+            key = f'{key}{DIVIDER + str(len(values)) if is_lexicon else "" }'
+            result_file.write(f'{key}{SPLIT}{documents}\n')
 
 
 def write_token_list_to_file(token_list: OrderedDict, path: str):
@@ -76,10 +75,10 @@ def write_token_list_to_file(token_list: OrderedDict, path: str):
     with open(path, 'w') as result_file:
         for key in token_list:
             token_inputs = iterable_to_str(token_list[key])
-            result_file.write(f'{key}\t{token_inputs}\n')
+            result_file.write(f'{key}{SPLIT}{token_inputs}\n')
 
 
 def write_doc_ids_to_file(file_doc_id: dict, path: str):
     with open(path, 'w') as file:
         for key in file_doc_id:
-            file.write(f'{key}\t{file_doc_id[key]}\n')
+            file.write(f'{key}{SPLIT}{file_doc_id[key]}\n')
