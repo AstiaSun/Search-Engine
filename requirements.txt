@@ -2,3 +2,4 @@ PyPDF2==1.26
 nltk==3.4
 sortedcontainers
 BTrees=4.5.1
+pytest==4.3.1

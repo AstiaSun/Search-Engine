@@ -70,3 +70,19 @@ Operators: AND, OR, NOT. Format on request at your own discretion
 **_Solution_**:
 
 In progress
+
+
+## 6. Compressed dictionary and compressed inverted index
+
+**_Task_**:
+
+
+Choose one of these methods and compress the dictionary and inverted collection index:
+
+- Dictionary: Dictionary as a strip
+- Dictionary: Block compression
+- Inverted file: Gamma codes
+
+**_Solution_**:
+
+I have chosen method of block compression for a dictionary and grey codes for inverted index.

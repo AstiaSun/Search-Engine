@@ -7,14 +7,14 @@ from threading import Thread
 from sortedcontainers import SortedDict
 
 from common.constants import PATH_TO_DICT, PATH_TO_RESULT_DIR, \
-    PATH_TO_LIST_OF_FILES
+    PATH_TO_LIST_OF_FILES, BYTE, PATH_TO_DATA_DIR
 from dictionary.decoder import get_file_reader_by_extension
 from dictionary.exceptions import NotSupportedExtensionException
 from dictionary.utils import get_list_of_files, write_doc_ids_to_file, \
     write_dictionary_to_file, write_token_list_to_file, \
-    add_unfinished_part_from_prev_chunk, get_tokens_from_chunk, PATH_TO_DIR
+    add_unfinished_part_from_prev_chunk, get_tokens_from_chunk
 
-CHUNK_SIZE = 1024
+CHUNK_SIZE = 4 * BYTE
 
 QUEUE_MAX_SIZE = 10000
 QUEUE_MIN_SIZE = 10000
@@ -43,13 +43,13 @@ def retrieve_tokens(chunk_start, chunk) -> list:
     return tokens
 
 
-def notify_on_finish():
+def notify_on_finish() -> None:
     """Send an event that the worked has finished reading from queue"""
     token_job_done.put(0)
     print("Chunk process down")
 
 
-def get_chunk_from_queue_and_process():
+def get_chunk_from_queue_and_process() -> bool:
     """
     Get retrieved tokens from received chunk and puts them into the
     queue
@@ -66,7 +66,7 @@ def get_chunk_from_queue_and_process():
     return True
 
 
-def chunk_to_tokens_worker():
+def chunk_to_tokens_worker() -> None:
     """
     While queue is not empty during timeout, read chunks from queue
     and split it to tokens. Then put tokens into the queue and wait
@@ -83,7 +83,7 @@ def get_list_or_add_to_lists(file_id: int) -> dict:
     return lexicon[file_id]
 
 
-def reduce_tokens_to_lexicon():
+def reduce_tokens_to_lexicon() -> None:
     """
     Read parsed token with position in specified documents and map them
     into token dictionary and inverted list of word positions
@@ -118,7 +118,7 @@ def reduce_tokens_to_lexicon():
                 return
 
 
-def read_document_and_put_into_queue(file_path: str, file_id: int):
+def read_document_and_put_into_queue(file_path: str, file_id: int) -> None:
     """
     Read document chunk by chunk and put them into the queue
     :param file_path: Path to document which will be read
@@ -148,7 +148,7 @@ def read_document_if_extension_is_supported(file_path, file_id) -> bool:
     return True
 
 
-def process_documents():
+def process_documents() -> None:
     """
     1. Discover file in the directory and give them a unique ID.
     2. Read each file if it is a document and the extension is
@@ -159,7 +159,7 @@ def process_documents():
     documents_with_id = dict()
 
     for file_id, file_name in get_list_of_files():
-        file_path = os.path.join(PATH_TO_DIR, file_name)
+        file_path = os.path.join(PATH_TO_DATA_DIR, file_name)
 
         if not os.path.isfile(file_path):
             continue
@@ -172,7 +172,7 @@ def process_documents():
     write_doc_ids_to_file(documents_with_id, PATH_TO_LIST_OF_FILES)
 
 
-def main():
+def main() -> None:
     """
     Algorithm:
     1. Producer reads documents -> puts data into the queue ->

@@ -4,12 +4,17 @@ from typing import BinaryIO
 
 import PyPDF2
 
+from common.constants import BYTE
 from dictionary.exceptions import NotSupportedExtensionException
 
-CHUNK_SIZE = 40 * 1024
+# max size of a chunk which is read from the file
+CHUNK_SIZE = 40 * BYTE
 
 
 class FileReader(object):
+    """
+    Interface class with methods to operate with files
+    """
     def __init__(self, file_path):
         self.file_path = file_path
 
@@ -24,6 +29,9 @@ class FileReader(object):
 
 
 class PlainTextReader(FileReader):
+    """
+    Reader supports '.txt' extension in utf-8 encoding
+    """
     def __init__(self, file_path):
         super(PlainTextReader, self).__init__(file_path)
         self.file = None
@@ -43,6 +51,10 @@ class PlainTextReader(FileReader):
 
 
 class PdfReader(FileReader):
+    """
+    Reader supports PDF files. Pictures and other non-text
+    instances are omitted.
+    """
     page: str
     file: BinaryIO
     file_reader: PyPDF2.PdfFileReader
@@ -59,10 +71,10 @@ class PdfReader(FileReader):
         self.page = ''
         return self
 
-    def _is_eof(self):
+    def _is_eof(self) -> bool:
         return self.file_reader.getNumPages() <= self.curr_page_num
 
-    def _read_page(self):
+    def _read_page(self) -> str:
         page = ''
         while not page:
             if not self._is_eof():
@@ -73,7 +85,7 @@ class PdfReader(FileReader):
                 break
         return page
 
-    def _split_into_chunks_and_put_into_queue(self):
+    def _split_into_chunks_and_put_into_queue(self) -> None:
         """
         Split page into chunks with size of CHUNK_SIZE. If the last
         chunk is smaller then this size, it is saved in 'page' variable.
@@ -90,7 +102,7 @@ class PdfReader(FileReader):
         if self._is_eof():
             self.chunks.put(self.page)
 
-    def _read_pages_and_put_chunks_to_queue(self):
+    def _read_pages_and_put_chunks_to_queue(self) -> None:
         self.page += self._read_page()
         while len(self.page) < CHUNK_SIZE and not self._is_eof():
             self.page += self._read_page()

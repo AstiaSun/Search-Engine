@@ -135,9 +135,9 @@ CONTRACTION_MAP = {
 
 class Tokenizer:
     tokenizer = ToktokTokenizer()
-    stopwords_list = stopwords.words('english')
 
     def __init__(self):
+        self.stopwords_list = stopwords.words('english')
         self.stopwords_list.remove('no')
         self.stopwords_list.remove('not')
 
@@ -187,7 +187,7 @@ class Tokenizer:
     def _remove_special_characters(text: str, remove_digits=False) -> str:
         """removes all special characters from the text"""
         pattern = r'[\.,!?;:\[\\\]\(\)~\{\}}\s\-{2,}"/\*\^±§`<>\|' + \
-                  '/d]' if remove_digits else ']'
+                  ('/d]' if remove_digits else ']')
         text = re.sub(pattern, '', text)
         return text
 
