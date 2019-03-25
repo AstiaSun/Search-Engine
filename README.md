@@ -82,6 +82,32 @@ Construct a two-word index and coordinate inverted index in a collection of docu
 Realize phrase search and search based on distance for each one.
 
 
+
+## 4. Suffix tree. Permutation index. 3-gram index
+
+
+**_Task_**:
+
+Construct a suffix tree of vocabulary terms, a permutation index for the 
+dictionary and a 3-gram index for the dictionary. Implement a support for 
+queries with jokers.
+
+
+## 5. Index construction
+
+
+**_Task_**:
+
+Choose one of the methods for building an index:
+
+- BSBI
+- SPIMI
+- MapReduce
+- Dynamic construction
+
+Using the chosen method build a large collection index.
+
+
 ## 6. Compressed dictionary and compressed inverted index
 
 **_Task_**:
