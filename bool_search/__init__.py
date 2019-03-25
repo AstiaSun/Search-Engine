@@ -1,1 +1,1 @@
-from bool_search.search import load_inverted_index, build_notation
+from bool_search.search import load_inverted_skip_index, build_notation

@@ -1,8 +1,10 @@
 from enum import Enum
 
 from bool_search.search_dictionary import DocumentSkipList, SearchDictionary, \
-    OPERATION_CODES
+    OPERATION_CODES, ALL
 from common.constants import SPLIT, DIVIDER, PATH_TO_DICT
+from common.exceptions import IncorrectQuery
+from dictionary.tokenizer import Tokenizer
 
 
 class OPERATIONS:
@@ -10,9 +12,10 @@ class OPERATIONS:
     OR = ['OR', '|']
     NOT = ['-']
     AND_OR = AND + OR
+    ALL = AND_OR + NOT
 
 
-def load_inverted_index(path: str = PATH_TO_DICT) -> SearchDictionary:
+def load_inverted_skip_index(path: str = PATH_TO_DICT) -> SearchDictionary:
     """
     Reads inverted index(dictionary) from file. The proposed data
     structure to save dictionary:
@@ -30,14 +33,8 @@ def load_inverted_index(path: str = PATH_TO_DICT) -> SearchDictionary:
             key, values = line.strip().split(SPLIT)
             # omit frequency in this case
             token, _ = key.split(DIVIDER)
-            # TODO: leave only values split
             result[token] = DocumentSkipList(values.split(','))
     return SearchDictionary(result)
-
-
-class IncorrectQuery(ValueError):
-    def __init__(self, query, position):
-        self.message = f'Query "{query}" is incorrect in position {position}'
 
 
 def get_operator_code(operator) -> OPERATION_CODES:
@@ -52,16 +49,21 @@ def get_operator_code(operator) -> OPERATION_CODES:
 
 
 def build_notation_from_normalized_query(query: str) -> list:
+    def tokenize(word: str) -> str:
+        word = tokenizer.tokenize(word)
+        return token[0][1] if word else ALL
+
     def add_token_to_notation():
         if token.startswith(OPERATIONS.NOT[0]) and len(token) > 1:
-            result_notation.append(token[1:])
+            result_notation.append(tokenize(token[1:]))
             result_notation.append(OPERATION_CODES.NOT)
         else:
-            result_notation.append(token)
+            result_notation.append(tokenize(token))
 
-    states = Enum('states', 'START TOKEN OPERATOR')
+    states = Enum(('states', 'START TOKEN OPERATOR'))
     result_notation = list()
     stack = list()
+    tokenizer = Tokenizer()
     state = states.START
     for token in query.split(' '):
         if state == states.START and token in OPERATIONS.AND_OR:
@@ -89,6 +91,10 @@ def build_notation_from_normalized_query(query: str) -> list:
     return result_notation
 
 
+def remove_extra_spaces(line: str) -> str:
+    return ' '.join(line.strip().split())
+
+
 def build_notation(command: str) -> list:
     """
     Convert command to an inverted notation.
@@ -96,10 +102,6 @@ def build_notation(command: str) -> list:
     by spaces
     :return: inverted notation
     """
-
-    def remove_extra_spaces(line: str) -> str:
-        return ' '.join(line.strip().split())
-
     if command == '' or command is None:
         return list()
     normalized_command = remove_extra_spaces(command)

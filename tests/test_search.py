@@ -1,11 +1,12 @@
 import pytest
 
-from bool_search import load_inverted_index, build_notation
+from bool_search import load_inverted_skip_index, build_notation
+from bool_search.search_dictionary import SearchDictionary
 
 
 @pytest.fixture
-def inverted_index() -> 'DocumentSkipList':
-    yield load_inverted_index()
+def inverted_index() -> SearchDictionary:
+    yield load_inverted_skip_index()
 
 
 @pytest.mark.parametrize('query, expected_documents',
@@ -17,7 +18,7 @@ def inverted_index() -> 'DocumentSkipList':
                           ('yon AND yonder', [5, 10, 11]),
                           ('yon OR yonder', [0, 2, 5, 8, 10, 11]),
                           ('yon -yonder', [0])])
-def test_search(inverted_index: 'DocumentSkipList',
+def test_search(inverted_index: SearchDictionary,
                 query: str, expected_documents: list):
     notation = build_notation(query)
     actual_documents = inverted_index.search(notation)

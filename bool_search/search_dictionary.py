@@ -2,15 +2,22 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+from bool_search.search import OPERATIONS
+from common import read_file_dictionary
 from common.constants import PATH_TO_LIST_OF_FILES, SPLIT
-from dictionary.tokenizer import Tokenizer
 
-OPERATION_CODES = Enum('OPERATION_CODES', 'AND OR NOT')
+OPERATION_CODES = Enum(('OPERATION_CODES', 'AND OR NOT'))
 ALL = '*'
 
 
 @dataclass
 class DocumentNode:
+    """
+    Data structure used to implement skip list. Contains a reference
+    to next node. If the next None is None - the next node is the
+    following in the list.
+    Structure: <document_id, reference_to_next_node>
+    """
     id: int
     # For memory optimisation None is used.
     # if field is None the next index is considered to be the
@@ -171,7 +178,7 @@ class SearchDictionary:
     def _concatenate(t1: DocumentSkipList, t2: DocumentSkipList
                      ) -> DocumentSkipList:
         """
-        AND operation
+        OR operation
 
         Algorithm:
         While the end of one of the document lists is not found:
@@ -210,6 +217,12 @@ class SearchDictionary:
 
     def exclude(self, document_list: DocumentSkipList, args
                 ) -> DocumentSkipList:
+        """
+        Find documents where the provided token is not met
+        :param document_list: list of documents where the token is met
+        :param args: spike solution
+        :return: list of documents where the token is not present
+        """
         documents_to_exclude = [node.id for node in document_list]
         result = DocumentSkipList()
         for doc_id in self.inverted_index[ALL]:
@@ -217,8 +230,12 @@ class SearchDictionary:
                 result.add(doc_id.id)
         return result
 
-    # idea: implement binary search in inverted index
+    # idea: improve search in inverted index, current complexity - O(n)
     def get_ids(self, token) -> Optional[DocumentSkipList]:
+        """
+        :param token: token is represented as a ley in the inverted index
+        :return: list of documents where the provided token is met
+        """
         try:
             return self.inverted_index[token]
         except KeyError:
@@ -226,6 +243,13 @@ class SearchDictionary:
 
     def process_operation(self, operator: str, t1: DocumentSkipList,
                           t2: DocumentSkipList = None) -> DocumentSkipList:
+        """
+        :param operator: operation between two lists or an operation
+         done on a single list
+        :param t1: first list of documents
+        :param t2: second list of documents. If None, extraction is done.
+        :return: result of operation between the lists of documents
+        """
         try:
             options = {
                 OPERATION_CODES.AND:
@@ -266,15 +290,12 @@ class SearchDictionary:
                 elif t2:
                     stack.append(t2)
 
-        tokenizer = Tokenizer()
         stack = list()
         for token in notation:
             if isinstance(token, OPERATION_CODES):
                 process_operation_and_put_result_to_stack()
             else:
-                result_token = tokenizer.tokenize(token)
-                stack.append(result_token[0][1]) \
-                    if result_token else stack.append(ALL)
+                stack.append(token)
         if len(stack) > 1:
             raise AttributeError(f'"{notation}" is incorrect or there is '
                                  f'a bug in the algorythm implementation.\n'
@@ -285,3 +306,76 @@ class SearchDictionary:
         if len(notation) == 0 or notation is None:
             return self.inverted_index[ALL].to_list()
         return self._search_not_null_query(notation)
+
+
+class SearchCoordinatedDictionary(SearchDictionary):
+    @staticmethod
+    def _get_coordinate_index(query: list, result_documents: list) -> dict:
+        """
+        builds query coordinated index
+        :param query: search query, already processed to notation or raw text
+        :return: dictionary of token intersections with the next structure:
+        {
+            token1: {<doc_id>: [pos1, pos2, ..posn], <doc2>: [..]}
+        }
+        """
+        tokens = {token: {} for token in query if query not in OPERATIONS.ALL}
+        coordinated_index = {token: [] for token in tokens}
+        for document in result_documents:
+            dictionary = read_file_dictionary(str(document))
+            for token in tokens:
+                coordinated_index[token][document] = dictionary[token]
+        return coordinated_index
+
+    def search(self, query: list, max_distance: int = 2) -> list:
+        """
+        :param query: search query
+        :param max_distance: maximum amount of characters between two words
+        :return: list of documents with start phrase positions sorted from
+        the most appropriate (the longest match) to the least appropriate
+        """
+        result_documents = super().search(query)
+        query = list(filter(lambda x: x not in OPERATIONS.ALL, query))
+        coordinate_index = self._get_coordinate_index(query, result_documents)
+
+        longest_results = list()
+        for doc_id, positions in coordinate_index[query[0]]:
+            local_results = {pos: 0 for pos in positions}
+            for start_position in positions:
+                end_position = start_position + len(query[0])
+                for i in range(1, len(query)):
+                    position = 0
+                    for position in coordinate_index[query[i]][doc_id]:
+                        if position < end_position:
+                            continue
+                    if end_position < position < end_position + max_distance:
+                        local_results[start_position] += 1
+                else:
+                    break
+            longest_position = None, 0
+            for pos, length in local_results.items():
+                if longest_position[0] is None:
+                    longest_position = (pos, length)
+                if length > longest_position[1]:
+                    longest_position = pos, length
+            longest_results.append(
+                (doc_id, longest_position[0], longest_position[1]))
+        return longest_results
+
+
+class PhraseSearchDictionary(SearchDictionary):
+    def search(self, query: list) -> list:
+        """
+        Search in the two word dictionary
+        :param query: phrases/words to search
+        :return: list of documents
+        """
+        last_token = None
+        result = None
+        for token in query:
+            if last_token is not None:
+                current_result = self.get_ids(f'{last_token} {token}')
+                result = current_result if result is None \
+                    else super()._intersect(result, current_result)
+            last_token = token
+        return result.to_list()

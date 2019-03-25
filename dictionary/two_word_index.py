@@ -1,18 +1,14 @@
 import os
-import sys
-import time
 from _queue import Empty
 from multiprocessing import Queue, Event, Process, Pool
 from threading import Thread
 
 from sortedcontainers import SortedDict
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 from common.constants import PATH_TO_DICT, PATH_TO_RESULT_DIR, \
     PATH_TO_LIST_OF_FILES, BYTE, PATH_TO_DATA_DIR
+from common.exceptions import NotSupportedExtensionException
 from dictionary.decoder import get_file_reader_by_extension
-from dictionary.exceptions import NotSupportedExtensionException
 from dictionary.utils import get_list_of_files, write_doc_ids_to_file, \
     write_dictionary_to_file, write_token_list_to_file, \
     add_unfinished_part_from_prev_chunk, get_tokens_from_chunk
@@ -216,10 +212,3 @@ def main() -> None:
         path_to_result_file = \
             os.path.join(PATH_TO_RESULT_DIR, str(file_id))
         write_token_list_to_file(word_position_list, path_to_result_file)
-
-
-if __name__ == '__main__':
-    start_time = time.time()
-    main()
-    spent_time = time.time() - start_time
-    print(f'{spent_time} was elapsed')
