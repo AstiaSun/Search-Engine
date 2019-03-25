@@ -69,7 +69,17 @@ Operators: AND, OR, NOT. Format on request at your own discretion
 
 **_Solution_**:
 
-In progress
+See boolean_search folder for detailed information
+
+
+## 3. Two-word index and coordinate inverted index
+
+
+**_Task_**:
+
+Construct a two-word index and coordinate inverted index in a collection of documents.
+
+Realize phrase search and search based on distance for each one.
 
 
 ## 6. Compressed dictionary and compressed inverted index

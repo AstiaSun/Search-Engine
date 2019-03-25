@@ -1,5 +1,4 @@
 import os
-import time
 from _queue import Empty
 from multiprocessing import Queue, Event, Process, Pool
 from threading import Thread
@@ -209,9 +208,8 @@ def main() -> None:
             os.path.join(PATH_TO_RESULT_DIR, str(file_id))
         write_token_list_to_file(word_position_list, path_to_result_file)
 
-
-if __name__ == '__main__':
-    start_time = time.time()
-    main()
-    spent_time = time.time() - start_time
-    print(f'{spent_time} was elapsed')
+# if __name__ == '__main__':
+#    start_time = time.time()
+#   main()
+#    spent_time = time.time() - start_time
+#    print(f'{spent_time} was elapsed')
