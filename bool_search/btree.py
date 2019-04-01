@@ -15,12 +15,12 @@ class Node:
     """
     Represents node in BTree
     """
-    keys: SortedList = field(default_factory=SortedList())
-    children: list = field(default_factory=list())
+    keys: SortedList = field(default_factory=SortedList)
+    children: list = field(default_factory=list)
     parent: Optional = None
 
     def is_leaf(self) -> bool:
-        return len(self.children) > 0
+        return len(self.children) == 0
 
     def set_keys(self, keys: list):
         self.keys = SortedList(keys)
@@ -38,6 +38,7 @@ def create_new_node(parent: Optional[Node],
         node.set_keys(keys)
     if children is not None:
         if len(keys) != len(children) - 1:
+            # TODO: a problem with list where keys are not unique
             raise IncorrectNodeParameters(len(keys), len(children))
         for child in children:
             child.parent = node
@@ -94,7 +95,7 @@ class SearchBTree:
         """
 
         def is_current_node_satisfies_token() -> bool:
-            last_key = current_node.keys[i]
+            last_key = current_node.keys[max(0, i - 1)]
             return len(last_key) >= len(token) and last_key.startswith(token)
 
         current_node = self.root
@@ -106,7 +107,7 @@ class SearchBTree:
                 i += 1
             if not leaf and is_current_node_satisfies_token():
                 return current_node
-            current_node = current_node.children[i + 1]
+            current_node = current_node.children[i]
         return current_node \
             if not startswith or is_current_node_satisfies_token() \
             else None
@@ -125,30 +126,29 @@ class SearchBTree:
         return get_tokens_in_children(token, search_node)
 
     def _put(self, node: Node, value: str, children: Optional[list] = None):
-        node.keys.append(value)
+        node.keys.add(value)
         if children is not None:
             node.set_children(node.children + children)
         if len(node.keys) >= self.order:
-            median_index = round((len(node.keys) + 1) / 2)
-            full_keys = node.keys + [value]
+            median_index = round(len(node.keys) / 2)
             left_child = create_new_node(
                 parent=node.parent,
-                keys=full_keys[:median_index],
+                keys=node.keys[:median_index],
                 children=None if node.is_leaf()
                 else node.children[:median_index + 1])
             right_child = create_new_node(
                 parent=node.parent,
-                keys=full_keys[median_index + 1:],
+                keys=node.keys[median_index + 1:],
                 children=None if node.is_leaf()
                 else node.children[median_index + 1:])
             if node.parent is None:
                 self.root = create_new_node(
                     parent=None,
-                    keys=full_keys[median_index:median_index + 1],
+                    keys=node.keys[median_index:median_index + 1],
                     children=[left_child, right_child])
             else:
                 node.parent.children.remove(node)
-                self._put(node.parent, full_keys[median_index],
+                self._put(node.parent, node.keys[median_index],
                           [left_child, right_child])
 
     def put(self, value: str):

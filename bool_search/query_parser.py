@@ -1,6 +1,6 @@
 from enum import Enum
 
-from bool_search.search_dictionary import DocumentSkipList, SearchDictionary, \
+from bool_search.skip_list_search import DocumentSkipList, SearchDictionary, \
     OPERATION_CODES, ALL
 from common.constants import SPLIT, DIVIDER, PATH_TO_DICT
 from common.exceptions import IncorrectQuery

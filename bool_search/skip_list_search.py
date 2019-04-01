@@ -2,14 +2,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-from sortedcontainers import SortedList
-
-from bool_search import SearchBTree
-from bool_search.search import OPERATIONS
-from common import read_file_dictionary
 from common.constants import PATH_TO_LIST_OF_FILES, SPLIT
 
-OPERATION_CODES = Enum(('OPERATION_CODES', 'AND OR NOT'))
+OPERATION_CODES = Enum('OPERATION_CODES', 'AND OR NOT')
 ALL = '*'
 
 
@@ -134,9 +129,10 @@ class DocumentSkipList:
 
 
 class SearchDictionary:
-    def __init__(self, inverted_index: dict):
+    def __init__(self, inverted_index: dict,
+                 file_dictionary: str = PATH_TO_LIST_OF_FILES):
         def get_all_file_ids() -> DocumentSkipList:
-            with open(PATH_TO_LIST_OF_FILES) as file:
+            with open(file_dictionary) as file:
                 result = [int(line.split(SPLIT)[1].strip()) for line in file]
             return DocumentSkipList(result)
 
@@ -309,148 +305,3 @@ class SearchDictionary:
         if len(notation) == 0 or notation is None:
             return self.inverted_index[ALL].to_list()
         return self._search_not_null_query(notation)
-
-
-class SearchCoordinatedDictionary(SearchDictionary):
-    @staticmethod
-    def _get_coordinate_index(query: list, result_documents: list) -> dict:
-        """
-        builds query coordinated index
-        :param query: search query, already processed to notation or raw text
-        :return: dictionary of token intersections with the next structure:
-        {
-            token1: {<doc_id>: [pos1, pos2, ..posn], <doc2>: [..]}
-        }
-        """
-        tokens = {token: {} for token in query if query not in OPERATIONS.ALL}
-        coordinated_index = {token: [] for token in tokens}
-        for document in result_documents:
-            dictionary = read_file_dictionary(str(document))
-            for token in tokens:
-                coordinated_index[token][document] = dictionary[token]
-        return coordinated_index
-
-    def search(self, query: list, max_distance: int = 2) -> list:
-        """
-        :param query: search query
-        :param max_distance: maximum amount of characters between two words
-        :return: list of documents with start phrase positions sorted from
-        the most appropriate (the longest match) to the least appropriate
-        """
-        result_documents = super().search(query)
-        query = list(filter(lambda x: x not in OPERATIONS.ALL, query))
-        coordinate_index = self._get_coordinate_index(query, result_documents)
-
-        longest_results = list()
-        for doc_id, positions in coordinate_index[query[0]]:
-            local_results = {pos: 0 for pos in positions}
-            for start_position in positions:
-                end_position = start_position + len(query[0])
-                for i in range(1, len(query)):
-                    position = 0
-                    for position in coordinate_index[query[i]][doc_id]:
-                        if position < end_position:
-                            continue
-                    if end_position < position < end_position + max_distance:
-                        local_results[start_position] += 1
-                else:
-                    break
-            longest_position = None, 0
-            for pos, length in local_results.items():
-                if longest_position[0] is None:
-                    longest_position = (pos, length)
-                if length > longest_position[1]:
-                    longest_position = pos, length
-            longest_results.append(
-                (doc_id, longest_position[0], longest_position[1]))
-        return longest_results
-
-
-class PhraseSearchDictionary(SearchDictionary):
-    def search(self, query: list) -> list:
-        """
-        Search in the two word dictionary
-        :param query: phrases/words to search
-        :return: list of documents
-        """
-        last_token = None
-        result = None
-        for token in query:
-            if last_token is not None:
-                current_result = self.get_ids(f'{last_token} {token}')
-                result = current_result if result is None \
-                    else super()._intersect(result, current_result)
-            last_token = token
-        return result.to_list()
-
-
-class WildcardSearch(SearchDictionary):
-    def __init__(self, inverted_index: dict):
-        super().__init__(inverted_index)
-        self.straight_btree = SearchBTree()
-        self.inverted_btree = SearchBTree()
-        for token in self.inverted_index.values():
-            self.inverted_btree.put(token[::-1])
-            self.straight_btree.put(token)
-
-    def _search_with_wildcards(self, token: str) -> list:
-        sub_token = token
-        wildcard_pos = -1
-        results = SortedList()
-        # todo: 3 gram search
-        while sub_token[wildcard_pos + 1:]:
-            wildcard_pos = sub_token.index('*')
-            docs = self.straight_btree.get(sub_token[:wildcard_pos])
-            results.extend(docs)
-            sub_token = sub_token[wildcard_pos + 1:]
-        return list(results)
-
-    def search(self, notation: list) -> list:
-        """
-        Search in the straight and inverted btrees of search in the tokens
-        :param notation: query to search where some token contain a wildcard
-        :return: a list of documents which match the query
-        """
-
-        def pop_last_result() -> DocumentSkipList:
-            """
-            if an item on the top of the stack is a token, find a list of
-            :return: skip list of document ids
-            """
-            last_token = stack.pop()
-            if isinstance(last_token, str):
-                last_token = self.get_ids(last_token)
-            return last_token
-
-        def process_operation_and_put_result_to_stack():
-            if token == OPERATION_CODES.NOT:
-                last_result = pop_last_result()
-                stack.append(self.process_operation(token, last_result))
-            else:
-                t1, t2 = pop_last_result(), pop_last_result()
-                if t1 and t2:
-                    stack.append(self.process_operation(token, t1, t2))
-                elif t1:
-                    stack.append(t1)
-                elif t2:
-                    stack.append(t2)
-
-        if len(notation) == 0 or notation is None:
-            return self.inverted_index[ALL].to_list()
-        stack = list()
-        for token in notation:
-            if isinstance(token, OPERATION_CODES):
-                process_operation_and_put_result_to_stack()
-            else:
-                if '*' in token:
-                    tokens = self._search_with_wildcards(token)
-                    query = tokens + [OPERATION_CODES.ADD
-                                      for _ in range(len(tokens) - 1)]
-                    stack.append(self.search(query))
-                else:
-                    stack.append(token)
-        if len(stack) > 1:
-            raise AttributeError(f'"{notation}" is incorrect or there is '
-                                 f'a bug in the algorythm implementation.\n'
-                                 f'Stack is not empty at the end: f{stack}')
-        return pop_last_result().to_list()

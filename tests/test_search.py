@@ -17,7 +17,7 @@ def btree(inverted_index) -> SearchBTree:
     yield btree
 
 
-@pytest.skip
+@pytest.mark.skip
 @pytest.mark.parametrize('query, expected_documents',
                          [('', [0, 1, 2, 4, 5, 6, 7, 8, 10, 11]),
                           ('and', [0, 1, 2, 4, 5, 6, 7, 8, 10, 11]),
