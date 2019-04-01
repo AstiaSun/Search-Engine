@@ -38,7 +38,6 @@ def create_new_node(parent: Optional[Node],
         node.set_keys(keys)
     if children is not None:
         if len(keys) != len(children) - 1:
-            # TODO: a problem with list where keys are not unique
             raise IncorrectNodeParameters(len(keys), len(children))
         for child in children:
             child.parent = node
@@ -54,6 +53,8 @@ def get_tokens_in_children(query: str, start_node: Node) -> list:
     result = list()
     current_node = start_node
     i = 0
+    while i < len(current_node.keys) and not is_current_node_satisfies_token():
+        i += 1
     while i < len(current_node.keys) and is_current_node_satisfies_token():
         result.append(current_node.keys[i])
         if not current_node.is_leaf():
@@ -82,13 +83,12 @@ class SearchBTree:
         self.root = Node()
         self.order = order
 
-    def get_node(self, token: str, startswith: bool = True, leaf: bool = False
+    def get_node(self, token: str, leaf: bool = False
                  ) -> Optional[Node]:
         """
         Find a first key which satisfies the search query and return the
         key with appropriate children in a range of a btree
         :param token: token or start of a token to search for
-        :param startswith: search token starts with the requested pattern
         :param leaf: is only a leaf is searched
         :return: <key value, list of appropriate children> if any
         result is found
@@ -108,9 +108,7 @@ class SearchBTree:
             if not leaf and is_current_node_satisfies_token():
                 return current_node
             current_node = current_node.children[i]
-        return current_node \
-            if not startswith or is_current_node_satisfies_token() \
-            else None
+        return current_node
 
     def get(self, token) -> list:
         """
@@ -174,7 +172,7 @@ class SearchBTree:
         :param value:
         :return:
         """
-        node = self.get_node(token=value, startswith=False, leaf=True)
+        node = self.get_node(token=value, leaf=True)
         if node is None:
             self.root = create_new_node(None, [value], None)
         else:

@@ -10,7 +10,7 @@ class WildcardSearch(SearchDictionary):
         super().__init__(inverted_index)
         self.straight_btree = SearchBTree()
         self.inverted_btree = SearchBTree()
-        for token in self.inverted_index.values():
+        for token in self.inverted_index.keys():
             self.inverted_btree.put(token[::-1])
             self.straight_btree.put(token)
 
@@ -22,7 +22,7 @@ class WildcardSearch(SearchDictionary):
         while sub_token[wildcard_pos + 1:]:
             wildcard_pos = sub_token.index('*')
             docs = self.straight_btree.get(sub_token[:wildcard_pos])
-            results.extend(docs)
+            results.update(docs)
             sub_token = sub_token[wildcard_pos + 1:]
         return list(results)
 
@@ -58,6 +58,8 @@ class WildcardSearch(SearchDictionary):
 
         if len(notation) == 0 or notation is None:
             return self.inverted_index[ALL].to_list()
+        if len(notation) == 1 and notation[0] not in OPERATION_CODES:
+            return self._search_with_wildcards(notation[0])
         stack = list()
         for token in notation:
             if isinstance(token, OPERATION_CODES):
@@ -65,7 +67,7 @@ class WildcardSearch(SearchDictionary):
             else:
                 if '*' in token:
                     tokens = self._search_with_wildcards(token)
-                    query = tokens + [OPERATION_CODES.ADD
+                    query = tokens + [OPERATION_CODES.AND
                                       for _ in range(len(tokens) - 1)]
                     stack.append(self.search(query))
                 else:

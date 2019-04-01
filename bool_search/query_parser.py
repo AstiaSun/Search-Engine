@@ -15,6 +15,22 @@ class OPERATIONS:
     ALL = AND_OR + NOT
 
 
+def load_inverted_list(path: str = PATH_TO_DICT) -> dict:
+    """
+    Reads inverted index(dictionary) from file
+    :param path:
+    :return:
+    """
+    result = dict()
+    with open(path) as file:
+        for line in file:
+            key, values = line.strip().split(SPLIT)
+            # omit frequency in this case
+            token, _ = key.split(DIVIDER)
+            result[token] = DocumentSkipList(values.split(','))
+    return result
+
+
 def load_inverted_skip_index(path: str = PATH_TO_DICT) -> SearchDictionary:
     """
     Reads inverted index(dictionary) from file. The proposed data
@@ -27,13 +43,7 @@ def load_inverted_skip_index(path: str = PATH_TO_DICT) -> SearchDictionary:
     :param path: path to file on disk with inverted index
     :return inverted index (dictionary)
     """
-    result = dict()
-    with open(path) as file:
-        for line in file:
-            key, values = line.strip().split(SPLIT)
-            # omit frequency in this case
-            token, _ = key.split(DIVIDER)
-            result[token] = DocumentSkipList(values.split(','))
+    result = load_inverted_list(path)
     return SearchDictionary(result)
 
 
@@ -60,7 +70,7 @@ def build_notation_from_normalized_query(query: str) -> list:
         else:
             result_notation.append(tokenize(token))
 
-    states = Enum(('states', 'START TOKEN OPERATOR'))
+    states = Enum('states', 'START TOKEN OPERATOR')
     result_notation = list()
     stack = list()
     tokenizer = Tokenizer()
