@@ -56,18 +56,23 @@ def dict_to_str(dictionary: OrderedDict) -> str:
     return '\t'.join([f'{key}|{value}' for key, value in dictionary.items()])
 
 
-def write_dictionary_to_file(dictionary: SortedDict, path: str,
-                             is_lexicon=False) -> None:
+def write_dictionary_to_file(dictionary: SortedDict, path: str, **kwargs):
     print(f'Writing dict of size {len(dictionary)} to {path}')
+
+    is_lexicon = 'is_lexicon' in kwargs
+    all_doc_lexicon = kwargs.get('lexicon', None)
 
     with open(path, 'w') as result_file:
         for key, values in dictionary.items():
             documents = iterable_to_str(values)
-            key = f'{key}{DIVIDER + str(len(values)) if is_lexicon else "" }'
+            if is_lexicon:
+                frequency = sum(map(
+                    lambda x: len(all_doc_lexicon[x][key]), values))
+                key = f'{key}{DIVIDER}{str(frequency)}'
             result_file.write(f'{key}{SPLIT}{documents}\n')
 
 
-def write_token_list_to_file(token_list: OrderedDict, path: str) -> None:
+def write_token_list_to_file(token_list: OrderedDict, path: str):
     print(f'Writing dict of size {len(token_list)} to {path}')
 
     with open(path, 'w') as result_file:
@@ -76,7 +81,7 @@ def write_token_list_to_file(token_list: OrderedDict, path: str) -> None:
             result_file.write(f'{key}{SPLIT}{token_inputs}\n')
 
 
-def write_doc_ids_to_file(file_doc_id: dict, path: str) -> None:
+def write_doc_ids_to_file(file_doc_id: dict, path: str):
     with open(path, 'w') as file:
         for key in file_doc_id:
             file.write(f'{key}{SPLIT}{file_doc_id[key]}\n')

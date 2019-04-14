@@ -18,8 +18,8 @@ CHUNK_SIZE = 4 * BYTE
 QUEUE_MAX_SIZE = 10000
 QUEUE_MIN_SIZE = 10000
 
-CHUNK_WORKERS_NUM = 4
-TOKEN_WORKERS_NUM = 2
+CHUNK_WORKERS_NUM = 6
+TOKEN_WORKERS_NUM = 3
 
 chunk_queue = Queue()
 token_queue = Queue()
@@ -205,7 +205,8 @@ def main() -> None:
 
     write_lexicon_process = \
         Process(target=write_dictionary_to_file,
-                args=(inverted_index, PATH_TO_DICT, True))
+                args=(inverted_index, PATH_TO_DICT),
+                kwargs=dict(is_lexicon=True, lexicon=lexicon))
     write_lexicon_process.start()
 
     for file_id, word_position_list in lexicon.items():

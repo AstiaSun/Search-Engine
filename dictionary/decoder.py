@@ -5,7 +5,7 @@ from typing import BinaryIO
 import PyPDF2
 
 from common.constants import BYTE
-from dictionary.exceptions import NotSupportedExtensionException
+from common.exceptions import NotSupportedExtensionException
 
 # max size of a chunk which is read from the file
 CHUNK_SIZE = 40 * BYTE

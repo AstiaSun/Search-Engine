@@ -171,7 +171,7 @@ def process_documents() -> None:
     write_doc_ids_to_file(documents_with_id, PATH_TO_LIST_OF_FILES)
 
 
-def main() -> None:
+def main():
     """
     Algorithm:
     1. Producer reads documents -> puts data into the queue ->
@@ -200,7 +200,8 @@ def main() -> None:
 
     write_lexicon_process = \
         Process(target=write_dictionary_to_file,
-                args=(inverted_index, PATH_TO_DICT, True))
+                args=(inverted_index, PATH_TO_DICT),
+                kwargs=dict(is_lexicon=True, lexicon=lexicon))
     write_lexicon_process.start()
 
     for file_id, word_position_list in lexicon.items():
