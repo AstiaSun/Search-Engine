@@ -1,3 +1,4 @@
+bitarray
 PyPDF2==1.26
 nltk==3.4
 sortedcontainers

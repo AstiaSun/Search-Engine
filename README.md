@@ -82,6 +82,11 @@ Construct a two-word index and coordinate inverted index in a collection of docu
 Realize phrase search and search based on distance for each one.
 
 
+**_Solution_**:
+
+See two-word index and coordinate inverted index 
+[construction implementation](https://github.com/AstiaSun/Search-Engine/blob/master/dictionary/two_word_index.py) 
+and [bool search implementation](https://github.com/AstiaSun/Search-Engine/blob/master/bool_search/two_token_search.py) 
 
 ## 4. Suffix tree. Permutation index. 3-gram index
 
@@ -92,6 +97,12 @@ Construct a suffix tree of vocabulary terms, a permutation index for the
 dictionary and a 3-gram index for the dictionary. Implement a support for 
 queries with jokers.
 
+
+**_Solution_**:
+
+Algorithms require BTree structure usage, which has been implemented [here](https://github.com/AstiaSun/Search-Engine/blob/master/bool_search/btree.py).
+Search methods in the structure is implemented [here](https://github.com/AstiaSun/Search-Engine/blob/master/bool_search/wildcard_search.py)
+Currently only Suffix Tree is processing but it supports only single wildcard appearing.
 
 ## 5. Index construction
 
@@ -107,6 +118,7 @@ Choose one of the methods for building an index:
 
 Using the chosen method build a large collection index.
 
+**_Solution_**: BSBI has been [implemented](https://github.com/AstiaSun/Search-Engine/blob/master/dictionary/bsbi.py).
 
 ## 6. Compressed dictionary and compressed inverted index
 
@@ -121,8 +133,14 @@ Choose one of these methods and compress the dictionary and inverted collection 
 
 **_Solution_**:
 
-I have chosen method of block compression for a dictionary and grey codes for inverted index.
+Block compression for a dictionary and gamma codes for inverted index have been implemented.
 
+[Gamma codes](https://nlp.stanford.edu/IR-book/html/htmledition/gamma-codes-1.html) are used to encode document ids for space compression.
 ## 7. Ranking
 
 **_Task_**: Implement a search by query request in collection of documents using zoned ranking.
+
+
+## 8. Clustering
+
+**_Task_**: Implement a clustering of document collection

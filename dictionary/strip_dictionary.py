@@ -1,4 +1,47 @@
+from bitarray import bitarray
+
 from common.constants import PATH_TO_DICT, SPLIT, DIVIDER
+
+
+def encode_gamma_code(n):
+    if int(n) < 2:
+        return bitarray(n), bitarray('')
+    binary_n = format(int(n), 'b')
+    binary_offset = binary_n[1::]
+    unary_length = bitarray([True for _ in range(len(binary_offset))]) + \
+        bitarray([False])
+    return bitarray(unary_length), bitarray(binary_offset)
+
+
+def decode_gamma_code(unary_n, offset):
+    def to_int(binary):
+        i = 0
+        for bit in binary:
+            i = (i << 1) | bit
+        return i
+
+    if len(offset) == 0:
+        return to_int(unary_n)
+    i = len(unary_n) - 1
+    while unary_n[i] == '1' and i > 0:
+        i -= 1
+    appendix = bitarray('1' * (len(unary_n) - i))
+    appendix.extend(offset)
+    return to_int(appendix)
+
+
+def encode_list(items: list) -> list:
+    result = list()
+    for doc_id in items:
+        result.append(encode_gamma_code(doc_id))
+    return result
+
+
+def decode_list(items: list) -> list:
+    result = list()
+    for unary_n, offset in items:
+        result.append(str(decode_gamma_code(unary_n, offset)))
+    return result
 
 
 class StripDictionary:
@@ -20,6 +63,7 @@ class StripDictionary:
             for line in file.readlines():
                 token_id, doc_ids_str = line.split(SPLIT)
                 doc_ids = doc_ids_str.strip().split(',')
+                doc_ids = encode_list(doc_ids)
                 if self.with_frequency:
                     token_id, frequency = token_id.split(DIVIDER)
                     record = (int(frequency), doc_ids, len(self.strip))
@@ -45,8 +89,8 @@ class StripDictionary:
 
     def get_documents(self, i: int) -> list:
         if self.with_frequency:
-            return self.dictionary[i][1]
-        return self.dictionary[i][0]
+            return decode_list(self.dictionary[i][1])
+        return decode_list(self.dictionary[i][0])
 
 
 class StripBlockDictionary(StripDictionary):
@@ -60,6 +104,7 @@ class StripBlockDictionary(StripDictionary):
             for line in file.readlines():
                 token_id, doc_ids_str = line.split(SPLIT)
                 doc_ids = doc_ids_str.strip().split(',')
+                doc_ids = encode_list(doc_ids)
                 if self.with_frequency:
                     token_id, frequency = token_id.split(DIVIDER)
                     record = [int(frequency), doc_ids]
@@ -121,6 +166,7 @@ class FrontPackDictionary(StripDictionary):
             for line in file.readlines():
                 token_id, doc_ids_str = line.split(SPLIT)
                 doc_ids = doc_ids_str.strip().split(',')
+                doc_ids = encode_list(doc_ids)
                 if self.with_frequency:
                     token_id, frequency = token_id.split(DIVIDER)
                     record = [int(frequency), doc_ids]
