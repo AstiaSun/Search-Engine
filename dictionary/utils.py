@@ -15,8 +15,8 @@ REGEXPS = {
 tokenizer = Tokenizer()
 
 
-def get_list_of_files() -> enumerate:
-    return enumerate(os.listdir(PATH_TO_DATA_DIR))
+def get_list_of_files(path_to_data: str = PATH_TO_DATA_DIR) -> enumerate:
+    return enumerate(os.listdir(path_to_data))
 
 
 def split_chunk(chunk: str) -> Tuple[str, str]:
