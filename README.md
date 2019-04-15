@@ -122,3 +122,7 @@ Choose one of these methods and compress the dictionary and inverted collection 
 **_Solution_**:
 
 I have chosen method of block compression for a dictionary and grey codes for inverted index.
+
+## 7. Ranking
+
+**_Task_**: Implement a search by query request in collection of documents using zoned ranking.
