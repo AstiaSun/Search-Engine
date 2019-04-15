@@ -2,8 +2,8 @@ from enum import Enum
 
 from sortedcontainers import SortedList
 
-from bool_search import SearchBTree
-from bool_search.skip_list_search import SearchDictionary, DocumentSkipList, \
+from search import SearchBTree
+from search.skip_list_search import SearchDictionary, DocumentSkipList, \
     OPERATION_CODES, ALL
 
 

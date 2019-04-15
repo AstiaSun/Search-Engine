@@ -1,10 +1,10 @@
 from enum import Enum
 
-from bool_search.skip_list_search import DocumentSkipList, SearchDictionary, \
-    OPERATION_CODES, ALL
 from common.constants import SPLIT, DIVIDER, PATH_TO_DICT
 from common.exceptions import IncorrectQuery
 from dictionary.tokenizer import Tokenizer
+from search.skip_list_search import DocumentSkipList, SearchDictionary, \
+    OPERATION_CODES, ALL
 
 
 class OPERATIONS:

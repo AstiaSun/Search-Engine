@@ -1,6 +1,6 @@
 import pytest
 
-from bool_search import load_inverted_skip_index, build_notation, \
+from search import load_inverted_skip_index, build_notation, \
     SearchBTree, SearchDictionary, WildcardSearch, load_inverted_list
 
 

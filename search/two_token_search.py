@@ -1,6 +1,6 @@
-from bool_search.query_parser import OPERATIONS
-from bool_search.skip_list_search import SearchDictionary
 from common import read_file_dictionary
+from search.query_parser import OPERATIONS
+from search.skip_list_search import SearchDictionary
 
 
 class PhraseSearchDictionary(SearchDictionary):

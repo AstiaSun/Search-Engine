@@ -86,7 +86,7 @@ Realize phrase search and search based on distance for each one.
 
 See two-word index and coordinate inverted index 
 [construction implementation](https://github.com/AstiaSun/Search-Engine/blob/master/dictionary/two_word_index.py) 
-and [bool search implementation](https://github.com/AstiaSun/Search-Engine/blob/master/bool_search/two_token_search.py) 
+and [bool search implementation](https://github.com/AstiaSun/Search-Engine/blob/master/search/two_token_search.py) 
 
 ## 4. Suffix tree. Permutation index. 3-gram index
 
@@ -100,8 +100,8 @@ queries with jokers.
 
 **_Solution_**:
 
-Algorithms require BTree structure usage, which has been implemented [here](https://github.com/AstiaSun/Search-Engine/blob/master/bool_search/btree.py).
-Search methods in the structure is implemented [here](https://github.com/AstiaSun/Search-Engine/blob/master/bool_search/wildcard_search.py)
+Algorithms require BTree structure usage, which has been implemented [here](https://github.com/AstiaSun/Search-Engine/blob/master/search/btree.py).
+Search methods in the structure is implemented [here](https://github.com/AstiaSun/Search-Engine/blob/master/search/wildcard_search.py)
 Currently only Suffix Tree is processing but it supports only single wildcard appearing.
 
 ## 5. Index construction
